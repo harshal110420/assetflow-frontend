@@ -1,0 +1,19 @@
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color); /* your existing border variable */
+  background: transparent;
+  color: var(--text-primary); /* your existing text variable */
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+.theme-toggle:hover {
+  background: var(--hover-bg); /* your existing hover variable */
+}
