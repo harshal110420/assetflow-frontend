@@ -39,6 +39,8 @@ export default function Layout() {
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
+          minWidth: 0,
+          overflow: "hidden",
         }}
       >
         <Header />
@@ -51,6 +53,8 @@ export default function Layout() {
             overflowX: "auto",
             width: "100%",
             minWidth: 0,
+            maxWidth: "100%",
+            boxSizing: "border-box",
           }}
         >
           <Outlet />

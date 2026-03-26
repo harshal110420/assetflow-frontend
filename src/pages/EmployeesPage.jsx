@@ -310,7 +310,7 @@ export default function EmployeesPage() {
     };
 
     return (
-        <div style={{ display: "flex", flexDirection: "column", gap: 20, animation: "fadeIn 0.4s ease" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 20, animation: "fadeIn 0.4s ease", minWidth: 0 }}>
             {/* Header */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
@@ -368,7 +368,14 @@ export default function EmployeesPage() {
                                     <th>Branch</th>
                                     <th>Type</th>
                                     <th>Status</th>
-                                    {(canEdit || canDelete) && <th style={{ paddingRight: 20 }}>Actions</th>}
+                                    {(canEdit || canDelete) && <th style={{
+                                        paddingRight: 20,
+                                        position: "sticky",
+                                        right: 0,
+                                        background: "var(--bg-card)",
+                                        zIndex: 2,
+                                        boxShadow: "-2px 0 8px rgba(0,0,0,0.15)"
+                                    }}>Actions</th>}
                                 </tr>
                             </thead>
                             <tbody>
@@ -412,7 +419,14 @@ export default function EmployeesPage() {
                                                 </span>
                                             </td>
                                             {(canEdit || canDelete) && (
-                                                <td style={{ paddingRight: 20 }}>
+                                                <td style={{
+                                                    paddingRight: 20,
+                                                    position: "sticky",
+                                                    right: 0,
+                                                    background: "var(--bg-card)",
+                                                    zIndex: 1,
+                                                    boxShadow: "-2px 0 8px rgba(0,0,0,0.15)"
+                                                }}>
                                                     <div style={{ display: "flex", gap: 6 }}>
                                                         <button
                                                             className="btn btn-secondary btn-sm"
