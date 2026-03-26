@@ -57,6 +57,12 @@ const NAV_SECTIONS = [
         label: "Approvals",
         slug: "approvals",
       },
+      {
+        to: "/amc",
+        icon: Wrench,
+        label: "AMC service",
+        slug: "amc",
+      },
     ],
   },
   {

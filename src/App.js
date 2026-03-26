@@ -26,6 +26,7 @@ import EmployeeDetailPage from "./pages/EmployeeDetailsPage";
 import CategoryPage from "./pages/CategoryPage";
 import AuditLogs from "./pages/AuditLogs";
 import BulkImport from "./pages/BulkImport";
+import AmcPage from "./pages/AmcPage";
 
 // Route guard
 const PrivateRoute = ({ children, roles }) => {
@@ -80,6 +81,7 @@ function AppRoutes() {
         <Route path="category" element={<CategoryPage />} />
         <Route path="audit-logs" element={<AuditLogs />} />
         <Route path="bulk-import" element={<BulkImport />} />
+        <Route path="amc" element={<AmcPage />} />
 
         <Route
           path="approval-templates"

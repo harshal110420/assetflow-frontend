@@ -11,6 +11,7 @@ import divisionReducer from "./slices/divisionSlice"; // ✅ naya
 import departmentReducer from "./slices/departmentSlice"; // ✅ naya
 import categoriesReducer from "./slices/categroySlice";
 import auditLogReducer from "./slices/auditLogSlice";
+import amcReducer from "./slices/amcSlice";
 
 export const store = configureStore({
   reducer: {
@@ -26,6 +27,7 @@ export const store = configureStore({
     departments: departmentReducer, // ✅ naya
     categories: categoriesReducer,
     auditLog: auditLogReducer,
+    amc: amcReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
