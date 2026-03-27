@@ -26,6 +26,8 @@ import {
   Layers,
   DatabaseIcon,
   DatabaseZapIcon,
+  Tag,
+  Store,
 } from "lucide-react";
 
 // ── Sidebar Sections ──────────────────────────────────────────────────────────
@@ -93,8 +95,8 @@ const NAV_SECTIONS = [
         slug: "category",
       },
       { to: "/locations", icon: MapPin, label: "Locations", slug: "locations" },
-      { to: "/brands", icon: MapPin, label: "Brands", slug: "brands" },
-      { to: "/vendors", icon: MapPin, label: "Vendors", slug: "vendors" },
+      { to: "/brands", icon: Tag, label: "Brands", slug: "brands" },
+      { to: "/vendors", icon: Store, label: "Vendors", slug: "vendors" },
     ],
   },
   {

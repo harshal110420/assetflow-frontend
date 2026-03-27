@@ -458,6 +458,29 @@ export default function AssetModal({ asset, onClose }) {
 
   const set = (field) => (e) => setForm({ ...form, [field]: e.target.value });
 
+  // ── Warranty Duration Options ─────────────────────────────────────────────
+  const WARRANTY_DURATIONS = [
+    { label: "1 Month", months: 1 },
+    { label: "3 Months", months: 3 },
+    { label: "6 Months", months: 6 },
+    { label: "9 Months", months: 9 },
+    { label: "1 Year", months: 12 },
+    { label: "18 Months", months: 18 },
+    { label: "2 Years", months: 24 },
+    { label: "3 Years", months: 36 },
+  ];
+
+  const handleWarrantyDuration = (months) => {
+    if (!months) return; // Custom selected — manual input
+    const base = form.purchaseDate ? new Date(form.purchaseDate) : new Date();
+    base.setMonth(base.getMonth() + months);
+    base.setDate(base.getDate() - 1); // Last valid day (31-03-2026 not 01-04-2026)
+    const yyyy = base.getFullYear();
+    const mm = String(base.getMonth() + 1).padStart(2, "0");
+    const dd = String(base.getDate()).padStart(2, "0");
+    setForm((f) => ({ ...f, warrantyExpiry: `${yyyy}-${mm}-${dd}` }));
+  };
+
   // ── Get category/subcategory names for suggestions ────────────────────────
   const selectedCategory = categories.find(
     (c) => c.id.toString() === form.categoryId.toString(),
@@ -793,13 +816,46 @@ export default function AssetModal({ asset, onClose }) {
                   />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Warranty Expiry</label>
-                  <input
-                    className="form-input"
-                    type="date"
-                    value={form.warrantyExpiry}
-                    onChange={set("warrantyExpiry")}
-                  />
+                  <label className="form-label">Warranty</label>
+                  <div
+                    style={{ display: "flex", gap: 8, alignItems: "center" }}
+                  >
+                    <select
+                      className="form-select"
+                      defaultValue=""
+                      onChange={(e) =>
+                        handleWarrantyDuration(
+                          e.target.value ? Number(e.target.value) : null,
+                        )
+                      }
+                      style={{ flex: "0 0 150px" }}
+                    >
+                      <option value="">-- Duration --</option>
+                      {WARRANTY_DURATIONS.map((d) => (
+                        <option key={d.label} value={d.months}>
+                          {d.label}
+                        </option>
+                      ))}
+                      <option value="">Custom</option>
+                    </select>
+                    <span style={{ color: "var(--text-muted)" }}>→</span>
+                    <input
+                      className="form-input"
+                      type="date"
+                      value={form.warrantyExpiry}
+                      onChange={set("warrantyExpiry")}
+                      style={{ flex: 1 }}
+                    />
+                  </div>
+                  <p
+                    style={{
+                      fontSize: 11,
+                      color: "var(--text-muted)",
+                      marginTop: 4,
+                    }}
+                  >
+                    Select a duration to auto-fill the expiry date, or enter the date manually.
+                  </p>
                 </div>
               </div>
               <div className="form-group">
