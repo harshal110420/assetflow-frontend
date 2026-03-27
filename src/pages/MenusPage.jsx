@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Plus, Edit2, Trash2, X, Save, Menu as MenuIcon, ToggleLeft, ToggleRight, GripVertical } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Save, Menu as MenuIcon, ToggleLeft, ToggleRight, GripVertical, Search } from 'lucide-react';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 
@@ -89,18 +89,11 @@ function MenuModal({ menu, onClose, onSaved }) {
 
     const filteredIcons = ICON_OPTIONS.filter(i => i.toLowerCase().includes(iconSearch.toLowerCase()));
 
-    const inputStyle = {
-        width: '100%', padding: '10px 12px', borderRadius: 8, fontSize: 14,
-        background: 'var(--bg-secondary)', border: '1px solid var(--border)',
-        color: 'var(--text-primary)', boxSizing: 'border-box', outline: 'none',
-    };
     const labelStyle = { color: 'var(--text-muted)', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1, display: 'block', marginBottom: 6 };
 
     return (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
             <div className="card" style={{ width: '100%', maxWidth: 560, maxHeight: '90vh', overflowY: 'auto', padding: 0, borderRadius: 16 }}>
-
-                {/* Header */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 24px', borderBottom: '1px solid var(--border)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <MenuIcon size={20} color="var(--accent)" />
@@ -112,8 +105,6 @@ function MenuModal({ menu, onClose, onSaved }) {
                 </div>
 
                 <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
-
-                    {/* Name + Slug */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                         <div>
                             <label style={labelStyle}>Menu Name *</label>
@@ -121,44 +112,25 @@ function MenuModal({ menu, onClose, onSaved }) {
                         </div>
                         <div>
                             <label style={labelStyle}>Slug *</label>
-                            <input
-                                className="form-input" value={slug} onChange={e => setSlug(e.target.value)}
-                                disabled={isSystem} placeholder="e.g. asset_master"
-                                style={{ opacity: isSystem ? 0.5 : 1, cursor: isSystem ? 'not-allowed' : 'text' }}
-                            />
+                            <input className="form-input" value={slug} onChange={e => setSlug(e.target.value)} disabled={isSystem} placeholder="e.g. asset_master" style={{ opacity: isSystem ? 0.5 : 1, cursor: isSystem ? 'not-allowed' : 'text' }} />
                             {isSystem && <p style={{ color: 'var(--text-muted)', fontSize: 11, marginTop: 4 }}>System slug — cannot be changed</p>}
                         </div>
                     </div>
 
-                    {/* Icon Picker + Order */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 120px', gap: 16 }}>
                         <div>
                             <label style={labelStyle}>Icon</label>
                             <div style={{ position: 'relative' }}>
-                                <button
-                                    onClick={() => setShowIconPicker(!showIconPicker)}
-                                    className="btn btn-secondary"
-                                    style={{ width: '100%', justifyContent: 'flex-start', gap: 10, fontWeight: 400, fontSize: 14 }}
-                                >
+                                <button onClick={() => setShowIconPicker(!showIconPicker)} className="btn btn-secondary" style={{ width: '100%', justifyContent: 'flex-start', gap: 10, fontWeight: 400, fontSize: 14 }}>
                                     <DynamicIcon name={icon} size={16} color="var(--accent)" />
                                     <span style={{ color: 'var(--text-primary)' }}>{icon}</span>
                                 </button>
                                 {showIconPicker && (
                                     <div style={{ position: 'absolute', top: '110%', left: 0, right: 0, background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, zIndex: 10, padding: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}>
-                                        <input
-                                            className="form-input" value={iconSearch} onChange={e => setIconSearch(e.target.value)}
-                                            placeholder="Search icon..." style={{ marginBottom: 10, fontSize: 13 }}
-                                        />
+                                        <input className="form-input" value={iconSearch} onChange={e => setIconSearch(e.target.value)} placeholder="Search icon..." style={{ marginBottom: 10, fontSize: 13 }} />
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 6, maxHeight: 180, overflowY: 'auto' }}>
                                             {filteredIcons.map(ic => (
-                                                <button
-                                                    key={ic} onClick={() => { setIcon(ic); setShowIconPicker(false); }} title={ic}
-                                                    style={{
-                                                        padding: 8, borderRadius: 6, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                        background: icon === ic ? 'var(--accent-glow)' : 'var(--bg-secondary)',
-                                                        border: `1px solid ${icon === ic ? 'var(--accent)' : 'var(--border)'}`,
-                                                    }}
-                                                >
+                                                <button key={ic} onClick={() => { setIcon(ic); setShowIconPicker(false); }} title={ic} style={{ padding: 8, borderRadius: 6, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', background: icon === ic ? 'var(--accent-glow)' : 'var(--bg-secondary)', border: `1px solid ${icon === ic ? 'var(--accent)' : 'var(--border)'}` }}>
                                                     <DynamicIcon name={ic} size={16} color={icon === ic ? 'var(--accent)' : 'var(--text-muted)'} />
                                                 </button>
                                             ))}
@@ -173,7 +145,6 @@ function MenuModal({ menu, onClose, onSaved }) {
                         </div>
                     </div>
 
-                    {/* Available Actions */}
                     <div>
                         <label style={labelStyle}>Available Actions</label>
                         <p style={{ color: 'var(--text-muted)', fontSize: 12, marginBottom: 12 }}>
@@ -183,17 +154,7 @@ function MenuModal({ menu, onClose, onSaved }) {
                             {ALL_ACTIONS.map(({ key, label, color }) => {
                                 const active = selectedActions.includes(key);
                                 return (
-                                    <button
-                                        key={key} onClick={() => toggleAction(key)}
-                                        style={{
-                                            padding: '7px 16px', borderRadius: 8, cursor: 'pointer', fontWeight: 600, fontSize: 13,
-                                            border: `1px solid ${active ? 'var(--border)' : 'var(--border)'}`,
-                                            background: active ? 'var(--bg-hover)' : 'transparent',
-                                            color: active ? color : 'var(--text-muted)',
-                                            transition: 'all 0.15s',
-                                            boxShadow: active ? `inset 0 0 0 1px ${color}55` : 'none',
-                                        }}
-                                    >
+                                    <button key={key} onClick={() => toggleAction(key)} style={{ padding: '7px 16px', borderRadius: 8, cursor: 'pointer', fontWeight: 600, fontSize: 13, border: `1px solid var(--border)`, background: active ? 'var(--bg-hover)' : 'transparent', color: active ? color : 'var(--text-muted)', transition: 'all 0.15s', boxShadow: active ? `inset 0 0 0 1px ${color}55` : 'none' }}>
                                         {active && <span style={{ marginRight: 4, fontSize: 11 }}>✓</span>}{label}
                                     </button>
                                 );
@@ -204,7 +165,6 @@ function MenuModal({ menu, onClose, onSaved }) {
                         </p>
                     </div>
 
-                    {/* Active toggle */}
                     {isEdit && (
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: 'var(--bg-secondary)', borderRadius: 10, border: '1px solid var(--border)' }}>
                             <div>
@@ -217,7 +177,6 @@ function MenuModal({ menu, onClose, onSaved }) {
                         </div>
                     )}
 
-                    {/* Footer Buttons */}
                     <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', paddingTop: 4 }}>
                         <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
                         <button className="btn btn-primary" onClick={handleSave} disabled={saving} style={{ display: 'flex', alignItems: 'center', gap: 8, opacity: saving ? 0.6 : 1 }}>
@@ -237,6 +196,7 @@ export default function MenusPage() {
     const [loading, setLoading] = useState(true);
     const [modalMenu, setModalMenu] = useState(undefined);
     const [deleting, setDeleting] = useState(null);
+    const [search, setSearch] = useState("");
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -260,6 +220,15 @@ export default function MenusPage() {
             toast.error(err.response?.data?.message || 'Failed to delete');
         } finally { setDeleting(null); }
     };
+
+    const filtered = menus.filter((m) => {
+        const q = search.toLowerCase();
+        return (
+            m.name?.toLowerCase().includes(q) ||
+            m.slug?.toLowerCase().includes(q) ||
+            m.icon?.toLowerCase().includes(q)
+        );
+    });
 
     const stats = [
         { label: 'Total', value: menus.length, color: 'var(--accent)', bg: 'var(--accent-glow)' },
@@ -296,6 +265,23 @@ export default function MenusPage() {
                 ))}
             </div>
 
+            {/* Search Bar */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ position: 'relative', flex: '1 1 220px', maxWidth: 360 }}>
+                    <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
+                    <input
+                        className="form-input"
+                        placeholder="Search by name, slug, or icon..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        style={{ paddingLeft: 32 }}
+                    />
+                </div>
+                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                    {filtered.length} menu{filtered.length !== 1 ? 's' : ''}
+                </span>
+            </div>
+
             {/* Table */}
             <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
                 <div style={{ overflowX: 'auto' }}>
@@ -323,7 +309,7 @@ export default function MenusPage() {
                                         ))}
                                     </tr>
                                 ))
-                            ) : menus.map(menu => {
+                            ) : filtered.map(menu => {
                                 const isSystem = SYSTEM_SLUGS.includes(menu.slug);
                                 return (
                                     <tr key={menu.id}>
@@ -353,22 +339,12 @@ export default function MenusPage() {
                                             </div>
                                         </td>
                                         <td>
-                                            <span style={{
-                                                padding: '3px 10px', borderRadius: 20, fontSize: 12, fontWeight: 600,
-                                                background: menu.isActive ? 'rgba(0,214,143,0.12)' : 'var(--bg-hover)',
-                                                color: menu.isActive ? 'var(--success)' : 'var(--text-muted)',
-                                                border: `1px solid ${menu.isActive ? 'rgba(0,214,143,0.3)' : 'var(--border)'}`,
-                                            }}>
+                                            <span style={{ padding: '3px 10px', borderRadius: 20, fontSize: 12, fontWeight: 600, background: menu.isActive ? 'rgba(0,214,143,0.12)' : 'var(--bg-hover)', color: menu.isActive ? 'var(--success)' : 'var(--text-muted)', border: `1px solid ${menu.isActive ? 'rgba(0,214,143,0.3)' : 'var(--border)'}` }}>
                                                 {menu.isActive ? 'Active' : 'Inactive'}
                                             </span>
                                         </td>
                                         <td>
-                                            <span style={{
-                                                padding: '3px 10px', borderRadius: 20, fontSize: 12, fontWeight: 600,
-                                                background: isSystem ? 'rgba(255,183,3,0.1)' : 'rgba(51,154,240,0.1)',
-                                                color: isSystem ? 'var(--warning)' : 'var(--info)',
-                                                border: `1px solid ${isSystem ? 'rgba(255,183,3,0.25)' : 'rgba(51,154,240,0.25)'}`,
-                                            }}>
+                                            <span style={{ padding: '3px 10px', borderRadius: 20, fontSize: 12, fontWeight: 600, background: isSystem ? 'rgba(255,183,3,0.1)' : 'rgba(51,154,240,0.1)', color: isSystem ? 'var(--warning)' : 'var(--info)', border: `1px solid ${isSystem ? 'rgba(255,183,3,0.25)' : 'rgba(51,154,240,0.25)'}` }}>
                                                 {isSystem ? 'System' : 'Custom'}
                                             </span>
                                         </td>
@@ -376,13 +352,7 @@ export default function MenusPage() {
                                             <div style={{ display: 'flex', gap: 6 }}>
                                                 <button className="btn btn-secondary btn-sm" onClick={() => setModalMenu(menu)} title="Edit"><Edit2 size={14} /></button>
                                                 {!isSystem && (
-                                                    <button
-                                                        className="btn btn-danger btn-sm"
-                                                        onClick={() => handleDelete(menu)}
-                                                        disabled={deleting === menu.id}
-                                                        title="Delete"
-                                                        style={{ opacity: deleting === menu.id ? 0.5 : 1 }}
-                                                    >
+                                                    <button className="btn btn-danger btn-sm" onClick={() => handleDelete(menu)} disabled={deleting === menu.id} title="Delete" style={{ opacity: deleting === menu.id ? 0.5 : 1 }}>
                                                         <Trash2 size={14} />
                                                     </button>
                                                 )}
@@ -391,11 +361,11 @@ export default function MenusPage() {
                                     </tr>
                                 );
                             })}
-                            {!loading && menus.length === 0 && (
+                            {!loading && filtered.length === 0 && (
                                 <tr>
                                     <td colSpan={8} style={{ padding: '48px 20px', textAlign: 'center', color: 'var(--text-muted)' }}>
                                         <MenuIcon size={36} style={{ opacity: 0.3, display: 'block', margin: '0 auto 12px' }} />
-                                        No menus found
+                                        {search ? 'No menus match your search.' : 'No menus found'}
                                     </td>
                                 </tr>
                             )}

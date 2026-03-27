@@ -3,8 +3,8 @@ import api from "../services/api";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUsers, createUser, updateUser } from "../store/slices/userSlice";
 import { fetchRoles } from "../store/slices/permissionSlice";
-import { fetchDepartments } from "../store/slices/departmentSlice"; // ✅ naya
-import { Plus, Edit2, UserCheck, X, Key } from "lucide-react";
+import { fetchDepartments } from "../store/slices/departmentSlice";
+import { Plus, Edit2, UserCheck, X, Key, Search, Filter } from "lucide-react";
 import UserPermissionModal from "../components/permissions/UserPermissionModal";
 import toast from "react-hot-toast";
 
@@ -17,7 +17,6 @@ const roleColor = {
 
 // ── User Modal ────────────────────────────────────────────────────────────────
 function UserModal({ user, allUsers, roles, departments, onClose }) {
-  // ✅ departments prop
   const dispatch = useDispatch();
   const [form, setForm] = useState({
     firstName: user?.firstName || "",
@@ -26,7 +25,7 @@ function UserModal({ user, allUsers, roles, departments, onClose }) {
     password: "",
     role: user?.role || "viewer",
     roleId: user?.roleId || "",
-    departmentId: user?.departmentId || "", // ✅ department string → departmentId
+    departmentId: user?.departmentId || "",
     phone: user?.phone || "",
     reportingManagerId: user?.reportingManagerId || "",
     isActive: user?.isActive !== false,
@@ -82,12 +81,11 @@ function UserModal({ user, allUsers, roles, departments, onClose }) {
       const payload = { ...form };
       if (user && !payload.password) delete payload.password;
       if (!payload.reportingManagerId) payload.reportingManagerId = null;
-      if (!payload.departmentId) payload.departmentId = null; // ✅
+      if (!payload.departmentId) payload.departmentId = null;
 
       const action = user
         ? updateUser({ id: user.id, ...payload })
         : createUser(payload);
-
       const result = await dispatch(action);
       if (result.error) throw new Error(result.payload?.message || "Failed");
 
@@ -132,7 +130,6 @@ function UserModal({ user, allUsers, roles, departments, onClose }) {
           onSubmit={handleSubmit}
           style={{ display: "flex", flexDirection: "column", gap: 16 }}
         >
-          {/* Name Row */}
           <div
             style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}
           >
@@ -158,7 +155,6 @@ function UserModal({ user, allUsers, roles, departments, onClose }) {
             </div>
           </div>
 
-          {/* Email */}
           <div className="form-group">
             <label className="form-label">Email *</label>
             <input
@@ -171,7 +167,6 @@ function UserModal({ user, allUsers, roles, departments, onClose }) {
             />
           </div>
 
-          {/* Password */}
           <div className="form-group">
             <label className="form-label">
               Password{" "}
@@ -195,7 +190,6 @@ function UserModal({ user, allUsers, roles, departments, onClose }) {
             />
           </div>
 
-          {/* Role + Department */}
           <div
             style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}
           >
@@ -214,8 +208,6 @@ function UserModal({ user, allUsers, roles, departments, onClose }) {
                 ))}
               </select>
             </div>
-
-            {/* ✅ Department string → Department dropdown */}
             <div className="form-group">
               <label className="form-label">Department</label>
               <select
@@ -234,7 +226,6 @@ function UserModal({ user, allUsers, roles, departments, onClose }) {
             </div>
           </div>
 
-          {/* Phone */}
           <div className="form-group">
             <label className="form-label">Phone</label>
             <input
@@ -245,7 +236,6 @@ function UserModal({ user, allUsers, roles, departments, onClose }) {
             />
           </div>
 
-          {/* Reporting Manager */}
           <div className="form-group">
             <label className="form-label">
               Reporting Manager
@@ -286,7 +276,6 @@ function UserModal({ user, allUsers, roles, departments, onClose }) {
             </span>
           </div>
 
-          {/* Location Assignment */}
           <div className="form-group">
             <label className="form-label">
               Assigned Locations
@@ -360,7 +349,6 @@ function UserModal({ user, allUsers, roles, departments, onClose }) {
             </p>
           </div>
 
-          {/* Status (edit only) */}
           {user && (
             <div className="form-group">
               <label className="form-label">Status</label>
@@ -423,17 +411,24 @@ function UserModal({ user, allUsers, roles, departments, onClose }) {
 export default function UsersPage() {
   const dispatch = useDispatch();
   const { users, isLoading } = useSelector((s) => s.users);
+  console.log("users:", users);
   const { user: me } = useSelector((s) => s.auth);
   const { roles } = useSelector((s) => s.permissions);
-  const { departments } = useSelector((s) => s.departments); // ✅ naya
+  const { departments } = useSelector((s) => s.departments);
   const [showModal, setShowModal] = useState(false);
   const [editUser, setEditUser] = useState(null);
   const [permissionUser, setPermissionUser] = useState(null);
 
+  // Search + Filter state
+  const [search, setSearch] = useState("");
+  const [filterRole, setFilterRole] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterDepartment, setFilterDepartment] = useState("all");
+
   useEffect(() => {
     dispatch(fetchUsers());
     dispatch(fetchRoles());
-    dispatch(fetchDepartments()); // ✅ departments load karo
+    dispatch(fetchDepartments());
   }, [dispatch]);
 
   const handleEdit = (u) => {
@@ -454,6 +449,46 @@ export default function UsersPage() {
     const manager = users.find((u) => u.id === managerId);
     return manager ? `${manager.firstName} ${manager.lastName}` : "—";
   };
+
+  // UsersPage ke andar add karo
+  const getDepartmentName = (deptId) => {
+    const dept = departments.find((d) => d.id === deptId);
+    return dept ? dept.name : "—";
+  };
+
+  // Unique roles from users for filter dropdown
+  const uniqueRoles = [...new Set(users.map((u) => u.role).filter(Boolean))];
+
+  const filtered = users.filter((u) => {
+    const q = search.toLowerCase();
+    const matchSearch =
+      `${u.firstName} ${u.lastName}`.toLowerCase().includes(q) ||
+      u.email?.toLowerCase().includes(q) ||
+      u.phone?.toLowerCase().includes(q) ||
+      u.department?.name?.toLowerCase().includes(q);
+
+    const matchRole = filterRole === "all" || u.role === filterRole;
+
+    const matchStatus =
+      filterStatus === "all" ||
+      (filterStatus === "active" && u.isActive !== false) ||
+      (filterStatus === "inactive" && u.isActive === false);
+
+    const matchDept =
+      filterDepartment === "all" ||
+      getDepartmentName(u.departmentId) === filterDepartment;
+
+    return matchSearch && matchRole && matchStatus && matchDept;
+  });
+
+  // Unique department names for filter dropdown
+  const uniqueDepartments = [
+    ...new Set(
+      users
+        .map((u) => departments.find((d) => d.id === u.departmentId)?.name)
+        .filter(Boolean),
+    ),
+  ];
 
   return (
     <div
@@ -486,6 +521,93 @@ export default function UsersPage() {
         )}
       </div>
 
+      {/* Search + Filters */}
+      <div
+        style={{
+          display: "flex",
+          gap: 10,
+          flexWrap: "wrap",
+          alignItems: "center",
+        }}
+      >
+        <div style={{ position: "relative", flex: "1 1 220px", maxWidth: 340 }}>
+          <Search
+            size={14}
+            style={{
+              position: "absolute",
+              left: 10,
+              top: "50%",
+              transform: "translateY(-50%)",
+              color: "var(--text-muted)",
+              pointerEvents: "none",
+            }}
+          />
+          <input
+            className="form-input"
+            placeholder="Search by name, email, phone, dept..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{ paddingLeft: 32 }}
+          />
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <Filter size={13} style={{ color: "var(--text-muted)" }} />
+          <select
+            className="form-input"
+            value={filterRole}
+            onChange={(e) => setFilterRole(e.target.value)}
+            style={{ fontSize: 13, padding: "6px 10px", minWidth: 130 }}
+          >
+            <option value="all">All Roles</option>
+            {uniqueRoles.map((r) => (
+              <option key={r} value={r} style={{ textTransform: "capitalize" }}>
+                {r}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <select
+            className="form-input"
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            style={{ fontSize: 13, padding: "6px 10px", minWidth: 120 }}
+          >
+            <option value="all">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+
+        <div>
+          <select
+            className="form-input"
+            value={filterDepartment}
+            onChange={(e) => setFilterDepartment(e.target.value)}
+            style={{ fontSize: 13, padding: "6px 10px", minWidth: 150 }}
+          >
+            <option value="all">All Departments</option>
+            {uniqueDepartments.map((d) => (
+              <option key={d} value={d}>
+                {d}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <span
+          style={{
+            fontSize: 12,
+            color: "var(--text-muted)",
+            marginLeft: "auto",
+          }}
+        >
+          {filtered.length} user{filtered.length !== 1 ? "s" : ""}
+        </span>
+      </div>
+
       {/* Table */}
       <div className="card" style={{ padding: 0, overflow: "hidden" }}>
         {isLoading ? (
@@ -494,7 +616,7 @@ export default function UsersPage() {
           >
             <div className="spinner" style={{ width: 32, height: 32 }} />
           </div>
-        ) : users.length === 0 ? (
+        ) : filtered.length === 0 ? (
           <div
             style={{
               padding: "48px 20px",
@@ -503,7 +625,11 @@ export default function UsersPage() {
             }}
           >
             <UserCheck size={40} style={{ marginBottom: 12, opacity: 0.4 }} />
-            <p>No users found</p>
+            <p>
+              {search
+                ? "No users match your search or filters."
+                : "No users found"}
+            </p>
           </div>
         ) : (
           <table className="table">
@@ -520,7 +646,7 @@ export default function UsersPage() {
               </tr>
             </thead>
             <tbody>
-              {users.map((u) => (
+              {filtered.map((u) => (
                 <tr key={u.id}>
                   <td style={{ paddingLeft: 20 }}>
                     <div
@@ -575,9 +701,8 @@ export default function UsersPage() {
                     </span>
                   </td>
 
-                  {/* ✅ Department object se naam */}
                   <td style={{ color: "var(--text-secondary)", fontSize: 13 }}>
-                    {u.department?.name || "—"}
+                    {getDepartmentName(u.departmentId)}
                   </td>
 
                   <td>
@@ -680,7 +805,7 @@ export default function UsersPage() {
           user={editUser}
           allUsers={users}
           roles={roles}
-          departments={departments} // ✅ pass karo
+          departments={departments}
           onClose={handleClose}
         />
       )}

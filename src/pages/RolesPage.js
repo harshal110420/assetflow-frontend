@@ -10,6 +10,8 @@ import {
   Save,
   ChevronDown,
   ChevronUp,
+  Search,
+  Filter,
 } from "lucide-react";
 import api from "../services/api";
 import toast from "react-hot-toast";
@@ -36,7 +38,7 @@ const ACTION_COLORS = {
   reject: "#ff4757",
 };
 
-// ── Role Modal (Create / Edit) ─────────────────────────────────────────────────
+// ── Role Modal ─────────────────────────────────────────────────────────────────
 function RoleModal({ role, onClose }) {
   const [name, setName] = useState(role?.name || "");
   const [description, setDescription] = useState(role?.description || "");
@@ -50,11 +52,8 @@ function RoleModal({ role, onClose }) {
     const load = async () => {
       setLoading(true);
       try {
-        // Sare menus fetch karo
         const { data: menusData } = await api.get("/permissions/menus");
         setMenus(menusData.data || []);
-
-        // Agar edit mode hai to existing permissions fetch karo
         if (role?.id) {
           const { data: roleData } = await api.get(
             `/roles/${role.id}/permissions`,
@@ -65,7 +64,6 @@ function RoleModal({ role, onClose }) {
           });
           setPermissions(permsMap);
         } else {
-          // New role — sab false
           const permsMap = {};
           menusData.data.forEach((m) => {
             permsMap[m.id] = {
@@ -96,13 +94,11 @@ function RoleModal({ role, onClose }) {
         ...prev,
         [menuId]: { ...prev[menuId], [action]: value },
       };
-      // View off → sab off
       if (action === "view" && !value) {
         Object.keys(updated[menuId]).forEach((a) => {
           updated[menuId][a] = false;
         });
       }
-      // Koi action on → view on
       if (action !== "view" && value) {
         updated[menuId].view = true;
       }
@@ -117,7 +113,6 @@ function RoleModal({ role, onClose }) {
       const permissionsArray = menus
         .map((m) => ({ menuId: m.id, actions: permissions[m.id] || {} }))
         .filter((p) => Object.values(p.actions).some((v) => v === true));
-
       if (role?.id) {
         await api.put(`/roles/${role.id}`, {
           name,
@@ -155,7 +150,6 @@ function RoleModal({ role, onClose }) {
           flexDirection: "column",
         }}
       >
-        {/* Header */}
         <div className="modal-header" style={{ flexShrink: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <Shield size={20} color="var(--accent)" />
@@ -177,7 +171,6 @@ function RoleModal({ role, onClose }) {
         </div>
 
         <div style={{ flex: 1, overflowY: "auto", padding: 20 }}>
-          {/* Name + Description */}
           <div
             style={{
               display: "grid",
@@ -218,7 +211,6 @@ function RoleModal({ role, onClose }) {
             </div>
           </div>
 
-          {/* Permissions Matrix */}
           <div>
             <h3
               style={{
@@ -249,7 +241,6 @@ function RoleModal({ role, onClose }) {
                   const hasAccess = Object.values(menuPerms).some(
                     (v) => v === true,
                   );
-                  const isExpanded = expandedMenus[menu.id];
                   return (
                     <div
                       key={menu.id}
@@ -328,7 +319,6 @@ function RoleModal({ role, onClose }) {
           </div>
         </div>
 
-        {/* Footer */}
         <div
           style={{
             padding: "14px 20px",
@@ -369,13 +359,15 @@ export default function RolesPage() {
   const { user: me } = useSelector((s) => s.auth);
   const [showModal, setShowModal] = useState(false);
   const [editRole, setEditRole] = useState(null);
-  const [loading, setLoading] = useState(false);
   const { can } = usePermission();
 
-  // Permission checks — DB se aata hai, role name se nahi
   const canCreate = can("roles", "new");
   const canEdit = can("roles", "edit");
   const canDelete = can("roles", "delete");
+
+  // Search + filter state
+  const [search, setSearch] = useState("");
+  const [filterType, setFilterType] = useState("all"); // "all" | "system" | "custom"
 
   useEffect(() => {
     dispatch(fetchRoles());
@@ -398,6 +390,18 @@ export default function RolesPage() {
     }
   };
 
+  const filtered = roles.filter((r) => {
+    const q = search.toLowerCase();
+    const matchSearch =
+      r.name?.toLowerCase().includes(q) ||
+      r.description?.toLowerCase().includes(q);
+    const matchType =
+      filterType === "all" ||
+      (filterType === "system" && r.isSystem) ||
+      (filterType === "custom" && !r.isSystem);
+    return matchSearch && matchType;
+  });
+
   if (me?.role !== "admin") {
     return (
       <div
@@ -413,6 +417,27 @@ export default function RolesPage() {
       </div>
     );
   }
+
+  const thStyle = {
+    padding: "10px 14px",
+    textAlign: "left",
+    fontSize: 12,
+    fontWeight: 600,
+    color: "var(--text-muted)",
+    textTransform: "uppercase",
+    letterSpacing: "0.05em",
+    borderBottom: "1px solid var(--border)",
+    whiteSpace: "nowrap",
+    background: "var(--surface)",
+  };
+
+  const tdStyle = {
+    padding: "11px 14px",
+    fontSize: 13,
+    color: "var(--text)",
+    borderBottom: "1px solid var(--border)",
+    verticalAlign: "middle",
+  };
 
   return (
     <div
@@ -450,111 +475,220 @@ export default function RolesPage() {
         )}
       </div>
 
-      {/* Roles Grid */}
+      {/* Search + Filters */}
       <div
         style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
-          gap: 16,
+          display: "flex",
+          gap: 10,
+          flexWrap: "wrap",
+          alignItems: "center",
         }}
       >
-        {roles.map((role) => (
-          <div key={role.id} className="card" style={{ position: "relative" }}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-                marginBottom: 14,
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div
-                  style={{
-                    width: 38,
-                    height: 38,
-                    borderRadius: 10,
-                    background:
-                      "linear-gradient(135deg, var(--accent), var(--accent-2))",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Shield size={18} color="#050b14" />
-                </div>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: 15 }}>
-                    {role.name}
+        <div style={{ position: "relative", flex: "1 1 220px", maxWidth: 340 }}>
+          <Search
+            size={14}
+            style={{
+              position: "absolute",
+              left: 10,
+              top: "50%",
+              transform: "translateY(-50%)",
+              color: "var(--text-muted)",
+              pointerEvents: "none",
+            }}
+          />
+          <input
+            className="form-input"
+            placeholder="Search by name or description..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{ paddingLeft: 32 }}
+          />
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <Filter size={13} style={{ color: "var(--text-muted)" }} />
+          <select
+            className="form-input"
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+            style={{ fontSize: 13, padding: "6px 10px", minWidth: 140 }}
+          >
+            <option value="all">All Types</option>
+            <option value="system">System Roles</option>
+            <option value="custom">Custom Roles</option>
+          </select>
+        </div>
+        <span
+          style={{
+            fontSize: 12,
+            color: "var(--text-muted)",
+            marginLeft: "auto",
+          }}
+        >
+          {filtered.length} role{filtered.length !== 1 ? "s" : ""}
+        </span>
+      </div>
+
+      {/* Table */}
+      <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr>
+                <th style={{ ...thStyle, width: 44 }}>#</th>
+                <th style={thStyle}>
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: 5 }}
+                  >
+                    <Shield size={13} /> Role Name
                   </div>
-                  {role.isSystem && (
+                </th>
+                <th style={thStyle}>Description</th>
+                <th style={thStyle}>Type</th>
+                {(canEdit || canDelete) && (
+                  <th style={{ ...thStyle, textAlign: "right" }}>Actions</th>
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((role, idx) => (
+                <tr
+                  key={role.id}
+                  style={{
+                    background:
+                      idx % 2 === 0 ? "transparent" : "rgba(255,255,255,0.02)",
+                    transition: "background 0.15s",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.background =
+                      "var(--hover, rgba(255,255,255,0.05))")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.background =
+                      idx % 2 === 0 ? "transparent" : "rgba(255,255,255,0.02)")
+                  }
+                >
+                  <td
+                    style={{
+                      ...tdStyle,
+                      color: "var(--text-muted)",
+                      fontSize: 12,
+                    }}
+                  >
+                    {idx + 1}
+                  </td>
+                  <td style={tdStyle}>
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: 10 }}
+                    >
+                      <div
+                        style={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: 8,
+                          background:
+                            "linear-gradient(135deg, var(--accent), var(--accent-2))",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <Shield size={15} color="#050b14" />
+                      </div>
+                      <span style={{ fontWeight: 600 }}>{role.name}</span>
+                    </div>
+                  </td>
+                  <td style={{ ...tdStyle, color: "var(--text-muted)" }}>
+                    {role.description || (
+                      <span style={{ fontStyle: "italic", opacity: 0.5 }}>
+                        No description
+                      </span>
+                    )}
+                  </td>
+                  <td style={tdStyle}>
                     <span
                       style={{
-                        fontSize: 10,
-                        padding: "1px 6px",
-                        background: "rgba(0,212,255,0.1)",
-                        color: "var(--accent)",
+                        fontSize: 11,
+                        padding: "2px 8px",
                         borderRadius: 10,
                         fontWeight: 600,
+                        background: role.isSystem
+                          ? "rgba(0,212,255,0.1)"
+                          : "rgba(100,116,139,0.1)",
+                        color: role.isSystem
+                          ? "var(--accent)"
+                          : "var(--text-muted)",
+                        border: `1px solid ${role.isSystem ? "rgba(0,212,255,0.3)" : "var(--border)"}`,
                       }}
                     >
-                      SYSTEM
+                      {role.isSystem ? "SYSTEM" : "CUSTOM"}
                     </span>
+                  </td>
+                  {(canEdit || canDelete) && (
+                    <td style={{ ...tdStyle, textAlign: "right" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: 6,
+                          justifyContent: "flex-end",
+                        }}
+                      >
+                        {canEdit && (
+                          <button
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => {
+                              setEditRole(role);
+                              setShowModal(true);
+                            }}
+                            title="Edit permissions"
+                          >
+                            <Edit2 size={13} />
+                          </button>
+                        )}
+                        {!role.isSystem && canDelete && (
+                          <button
+                            className="btn btn-danger btn-sm"
+                            onClick={() => handleDelete(role)}
+                            title="Delete role"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        )}
+                      </div>
+                    </td>
                   )}
-                </div>
-              </div>
-              <div style={{ display: "flex", gap: 6 }}>
-                {canEdit && (
-                  <button
-                    className="btn btn-secondary btn-sm"
-                    onClick={() => {
-                      setEditRole(role);
-                      setShowModal(true);
-                    }}
-                    title="Edit permissions"
-                  >
-                    <Edit2 size={13} />
-                  </button>
-                )}
-                {!role.isSystem && canDelete && (
-                  <button
-                    className="btn btn-danger btn-sm"
-                    onClick={() => handleDelete(role)}
-                    title="Delete role"
-                  >
-                    <Trash2 size={13} />
-                  </button>
-                )}
-              </div>
-            </div>
-            {role.description && (
-              <p
-                style={{
-                  fontSize: 13,
-                  color: "var(--text-muted)",
-                  marginBottom: 0,
-                }}
-              >
-                {role.description}
-              </p>
-            )}
-          </div>
-        ))}
+                </tr>
+              ))}
 
-        {roles.length === 0 && (
-          <div
-            className="card"
-            style={{
-              textAlign: "center",
-              padding: "48px 20px",
-              color: "var(--text-muted)",
-              gridColumn: "1/-1",
-            }}
-          >
-            <Shield size={40} style={{ opacity: 0.3, marginBottom: 12 }} />
-            <p>No roles yet. Create your first role!</p>
-          </div>
-        )}
+              {filtered.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={5}
+                    style={{
+                      padding: "48px 20px",
+                      textAlign: "center",
+                      color: "var(--text-muted)",
+                    }}
+                  >
+                    <Shield
+                      size={36}
+                      style={{
+                        opacity: 0.25,
+                        display: "block",
+                        margin: "0 auto 10px",
+                      }}
+                    />
+                    <p>
+                      {search
+                        ? "No roles match your search."
+                        : "No roles yet. Create your first role!"}
+                    </p>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {showModal && (
