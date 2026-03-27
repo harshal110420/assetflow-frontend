@@ -16,7 +16,7 @@ import AuditLogDrawer from "../components/AuditLogDrawer";
 
 const ENTITY_TYPES = [
     "Asset", "Employee", "User", "Department",
-    "Location", "Division", "Category", "Maintenance",
+    "Location", "Division", "Category", "Maintenance", "ApprovalRequest", "Setting"
 ];
 
 const ACTIONS = [
