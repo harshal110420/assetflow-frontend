@@ -12,7 +12,8 @@ import departmentReducer from "./slices/departmentSlice"; // ✅ naya
 import categoriesReducer from "./slices/categroySlice";
 import auditLogReducer from "./slices/auditLogSlice";
 import amcReducer from "./slices/amcSlice";
-
+import brandReducer from "./slices/brandSlice";
+import vendorReducer from "./slices/vendorSlice";
 export const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -28,6 +29,8 @@ export const store = configureStore({
     categories: categoriesReducer,
     auditLog: auditLogReducer,
     amc: amcReducer,
+    brands: brandReducer,
+    vendors: vendorReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

@@ -7,6 +7,8 @@ import {
 } from "../../store/slices/categroySlice";
 import { createAsset, updateAsset } from "../../store/slices/assetSlice";
 import { fetchDepartments } from "../../store/slices/departmentSlice";
+import { fetchBrands } from "../../store/slices/brandSlice";
+import { fetchVendors } from "../../store/slices/vendorSlice";
 import { X, Plus, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -362,6 +364,8 @@ export default function AssetModal({ asset, onClose }) {
   const isEdit = !!asset;
 
   const { departments } = useSelector((s) => s.departments);
+  const { brands } = useSelector((s) => s.brands);
+  const { vendors } = useSelector((s) => s.vendors);
   const { categories, subCategories } = useSelector((s) => s.categories);
 
   // ── Parse existing customFields from asset ────────────────────────────────
@@ -394,7 +398,8 @@ export default function AssetModal({ asset, onClose }) {
       asset?.subCategory?.id?.toString() ||
       "",
     description: asset?.description || "",
-    brand: asset?.brand || "",
+    brandId: asset?.brandId || "",
+    vendorId: asset?.vendorId || "",
     model: asset?.model || "",
     serialNumber: asset?.serialNumber || "",
     status: asset?.status || "Active",
@@ -407,7 +412,6 @@ export default function AssetModal({ asset, onClose }) {
     warrantyExpiry: asset?.warrantyExpiry
       ? asset.warrantyExpiry.split("T")[0]
       : "",
-    vendor: asset?.vendor || "",
     notes: asset?.notes || "",
   });
 
@@ -429,6 +433,8 @@ export default function AssetModal({ asset, onClose }) {
     dispatch(fetchCategories());
     dispatch(fetchSubCategories());
     dispatch(fetchDepartments());
+    dispatch(fetchBrands());
+    dispatch(fetchVendors());
   }, [dispatch]);
 
   // ── SubCategory validate-and-reset ───────────────────────────────────────
@@ -632,12 +638,18 @@ export default function AssetModal({ asset, onClose }) {
               <div className="grid-2">
                 <div className="form-group">
                   <label className="form-label">Brand</label>
-                  <input
-                    className="form-input"
-                    value={form.brand}
-                    onChange={set("brand")}
-                    placeholder="Apple"
-                  />
+                  <select
+                    className="form-select"
+                    value={form.brandId}
+                    onChange={set("brandId")}
+                  >
+                    <option value="">-- Select Brand --</option>
+                    {brands.map((b) => (
+                      <option key={b.id} value={b.id}>
+                        {b.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className="form-group">
                   <label className="form-label">Model</label>
@@ -792,12 +804,19 @@ export default function AssetModal({ asset, onClose }) {
               </div>
               <div className="form-group">
                 <label className="form-label">Vendor</label>
-                <input
-                  className="form-input"
-                  value={form.vendor}
-                  onChange={set("vendor")}
-                  placeholder="Apple Store / Amazon"
-                />
+                <select
+                  className="form-select"
+                  value={form.vendorId}
+                  onChange={set("vendorId")}
+                >
+                  <option value="">-- Select Vendor --</option>
+                  {vendors.map((v) => (
+                    <option key={v.id} value={v.id}>
+                      {v.name}
+                      {v.contactPerson ? ` — ${v.contactPerson}` : ""}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
           )}

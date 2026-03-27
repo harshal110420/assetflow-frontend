@@ -93,6 +93,8 @@ const NAV_SECTIONS = [
         slug: "category",
       },
       { to: "/locations", icon: MapPin, label: "Locations", slug: "locations" },
+      { to: "/brands", icon: MapPin, label: "Brands", slug: "brands" },
+      { to: "/vendors", icon: MapPin, label: "Vendors", slug: "vendors" },
     ],
   },
   {
