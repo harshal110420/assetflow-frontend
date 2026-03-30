@@ -1,7 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { createContext, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronRight, Save, X, AlertCircle } from "lucide-react";
 
+// ── Context — lets FormSection know which section is active ──────────────────
+const ActiveSectionContext = createContext("");
+
+// ── Main Layout ───────────────────────────────────────────────────────────────
 export default function FormPageLayout({
     title,
     subtitle,
@@ -16,32 +20,6 @@ export default function FormPageLayout({
 }) {
     const navigate = useNavigate();
     const [activeSection, setActiveSection] = useState(sections[0]?.id || "");
-    const contentRef = useRef(null);
-    const observerRef = useRef(null);
-
-    useEffect(() => {
-        if (!sections.length) return;
-        observerRef.current = new IntersectionObserver(
-            (entries) => {
-                entries.forEach((entry) => {
-                    if (entry.isIntersecting) setActiveSection(entry.target.id);
-                });
-            },
-            { root: contentRef.current, rootMargin: "-30% 0px -60% 0px", threshold: 0 }
-        );
-        sections.forEach(({ id }) => {
-            const el = document.getElementById(id);
-            if (el) observerRef.current.observe(el);
-        });
-        return () => observerRef.current?.disconnect();
-    }, [sections]);
-
-    const scrollToSection = (id) => {
-        const el = document.getElementById(id);
-        if (!el || !contentRef.current) return;
-        contentRef.current.scrollTo({ top: el.offsetTop - 24, behavior: "smooth" });
-        setActiveSection(id);
-    };
 
     const handleCancel = () => {
         if (isDirty && !window.confirm("Unsaved changes will be lost. Continue?")) return;
@@ -49,96 +27,123 @@ export default function FormPageLayout({
     };
 
     return (
-        <div style={styles.root}>
+        <ActiveSectionContext.Provider value={activeSection}>
+            <div style={styles.root}>
 
-            {/* ── Breadcrumb ───────────────────────────────────────────────── */}
-            <div style={styles.breadcrumbBar}>
-                {breadcrumbs.map((crumb, i) => (
-                    <React.Fragment key={i}>
-                        {crumb.path ? (
-                            <button onClick={() => navigate(crumb.path)} style={styles.breadcrumbLink}>
-                                {crumb.label}
-                            </button>
-                        ) : (
-                            <span style={styles.breadcrumbCurrent}>{crumb.label}</span>
-                        )}
-                        {i < breadcrumbs.length - 1 && (
-                            <ChevronRight size={13} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
-                        )}
-                    </React.Fragment>
-                ))}
-                {isDirty && (
-                    <span style={styles.dirtyBadge}>
-                        <AlertCircle size={11} /> Unsaved changes
-                    </span>
-                )}
-            </div>
-
-            {/* ── Page Header ──────────────────────────────────────────────── */}
-            <div style={styles.pageHeader}>
-                <h1 style={styles.pageTitle}>{title}</h1>
-                {subtitle && <p style={styles.pageSubtitle}>{subtitle}</p>}
-            </div>
-
-            {/* ── Body ─────────────────────────────────────────────────────── */}
-            <div style={styles.body}>
-
-                {/* Sidebar */}
-                {sections.length > 0 && (
-                    <aside style={styles.sidebar}>
-                        <div style={styles.sidebarSticky}>
-                            <p style={styles.sidebarLabel}>Sections</p>
-                            <nav style={styles.sidebarNav}>
-                                {sections.map(({ id, label, icon: Icon }) => {
-                                    const isActive = activeSection === id;
-                                    return (
-                                        <button
-                                            key={id}
-                                            onClick={() => scrollToSection(id)}
-                                            style={{ ...styles.navItem, ...(isActive ? styles.navItemActive : {}) }}
-                                        >
-                                            {isActive && <span style={styles.navActiveDot} />}
-                                            {Icon && <Icon size={14} color={isActive ? "var(--accent)" : "var(--text-muted)"} style={{ flexShrink: 0 }} />}
-                                            <span>{label}</span>
-                                        </button>
-                                    );
-                                })}
-                            </nav>
-                        </div>
-                    </aside>
-                )}
-
-                {/* Scrollable form content — ONLY this scrolls */}
-                <main ref={contentRef} style={styles.content}>
-                    <div style={styles.contentInner}>
-                        {children}
-                    </div>
-                    <div style={{ height: 80 }} />
-                </main>
-            </div>
-
-            {/* ── Sticky Footer ─────────────────────────────────────────────── */}
-            <div style={styles.footer}>
-                <button className="btn btn-secondary" onClick={handleCancel} disabled={saving} style={{ minWidth: 100 }}>
-                    <X size={15} /> Cancel
-                </button>
-                <button className="btn btn-primary" onClick={onSave} disabled={saving} style={{ minWidth: 140, opacity: saving ? 0.7 : 1 }}>
-                    {saving ? (
-                        <><span className="spinner" style={{ width: 14, height: 14 }} /> Saving…</>
-                    ) : (
-                        <><Save size={15} /> {saveLabel}</>
+                {/* ── Breadcrumb ───────────────────────────────────────────── */}
+                <div style={styles.breadcrumbBar}>
+                    {breadcrumbs.map((crumb, i) => (
+                        <React.Fragment key={i}>
+                            {crumb.path ? (
+                                <button onClick={() => navigate(crumb.path)} style={styles.breadcrumbLink}>
+                                    {crumb.label}
+                                </button>
+                            ) : (
+                                <span style={styles.breadcrumbCurrent}>{crumb.label}</span>
+                            )}
+                            {i < breadcrumbs.length - 1 && (
+                                <ChevronRight size={13} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
+                            )}
+                        </React.Fragment>
+                    ))}
+                    {isDirty && (
+                        <span style={styles.dirtyBadge}>
+                            <AlertCircle size={11} /> Unsaved changes
+                        </span>
                     )}
-                </button>
+                </div>
+
+                {/* ── Page Header ──────────────────────────────────────────── */}
+                <div style={styles.pageHeader}>
+                    <h1 style={styles.pageTitle}>{title}</h1>
+                    {subtitle && <p style={styles.pageSubtitle}>{subtitle}</p>}
+                </div>
+
+                {/* ── Body ─────────────────────────────────────────────────── */}
+                <div style={styles.body}>
+
+                    {/* Sidebar */}
+                    {sections.length > 0 && (
+                        <aside style={styles.sidebar}>
+                            <div style={styles.sidebarSticky}>
+                                <p style={styles.sidebarLabel}>Sections</p>
+                                <nav style={styles.sidebarNav}>
+                                    {sections.map(({ id, label, icon: Icon }) => {
+                                        const isActive = activeSection === id;
+                                        return (
+                                            <button
+                                                key={id}
+                                                onClick={() => setActiveSection(id)}
+                                                style={{ ...styles.navItem, ...(isActive ? styles.navItemActive : {}) }}
+                                            >
+                                                {isActive && <span style={styles.navActiveDot} />}
+                                                {Icon && (
+                                                    <Icon
+                                                        size={14}
+                                                        color={isActive ? "var(--accent)" : "var(--text-muted)"}
+                                                        style={{ flexShrink: 0 }}
+                                                    />
+                                                )}
+                                                <span>{label}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </nav>
+                            </div>
+                        </aside>
+                    )}
+
+                    {/* Content area — only active section is shown */}
+                    <main style={styles.content}>
+                        <div style={styles.contentInner}>
+                            {children}
+                        </div>
+                    </main>
+                </div>
+
+                {/* ── Sticky Footer ────────────────────────────────────────── */}
+                <div style={styles.footer}>
+                    <button
+                        className="btn btn-secondary"
+                        onClick={handleCancel}
+                        disabled={saving}
+                        style={{ minWidth: 100 }}
+                    >
+                        <X size={15} /> Cancel
+                    </button>
+                    <button
+                        className="btn btn-primary"
+                        onClick={onSave}
+                        disabled={saving}
+                        style={{ minWidth: 140, opacity: saving ? 0.7 : 1 }}
+                    >
+                        {saving ? (
+                            <><span className="spinner" style={{ width: 14, height: 14 }} /> Saving…</>
+                        ) : (
+                            <><Save size={15} /> {saveLabel}</>
+                        )}
+                    </button>
+                </div>
             </div>
-        </div>
+        </ActiveSectionContext.Provider>
     );
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
+// FormSection: renders only when its id matches the active section
 export function FormSection({ id, title, subtitle, children }) {
+    const activeSection = useContext(ActiveSectionContext);
+
+    // Hide when not active — but keep mounted so form state is preserved
     return (
-        <section id={id} style={sectionStyles.wrapper}>
+        <section
+            id={id}
+            style={{
+                ...sectionStyles.wrapper,
+                display: activeSection === id ? "block" : "none",
+            }}
+        >
             <div style={sectionStyles.header}>
                 <div style={sectionStyles.headerLine} />
                 <div>
@@ -186,13 +191,13 @@ export function FormField({ label, required, hint, error, children }) {
 // ── Styles ────────────────────────────────────────────────────────────────────
 const styles = {
     root: {
-        flex: 1,               // fills Layout's <main> which is now display:flex flex-col
+        flex: 1,
         display: "flex",
         flexDirection: "column",
-        overflow: "hidden",    // root must NOT scroll — children handle it
+        overflow: "hidden",
         minHeight: 0,
         animation: "fadeIn 0.3s ease",
-        paddingLeft: 24,       // replaces the padding that Layout was giving
+        paddingLeft: 24,
         paddingRight: 24,
     },
     breadcrumbBar: {
@@ -225,8 +230,8 @@ const styles = {
     pageSubtitle: { color: "var(--text-muted)", fontSize: 13, margin: "4px 0 0 0" },
     body: {
         display: "flex",
-        flex: 1,        // takes up all space between header and footer
-        minHeight: 0,   // critical — without this flex overflow breaks
+        flex: 1,
+        minHeight: 0,
         overflow: "hidden",
     },
     sidebar: {
@@ -258,11 +263,11 @@ const styles = {
     },
     content: {
         flex: 1,
-        overflowY: "auto",  // ONLY this element scrolls
+        overflowY: "auto",
         padding: "0 0 0 28px",
         minWidth: 0,
     },
-    contentInner: { maxWidth: 680, paddingTop: 24 },
+    contentInner: { maxWidth: 680, paddingTop: 24, paddingBottom: 40 },
     footer: {
         display: "flex", justifyContent: "flex-end", gap: 10,
         padding: "12px 0",
@@ -273,7 +278,7 @@ const styles = {
 };
 
 const sectionStyles = {
-    wrapper: { marginBottom: 40, scrollMarginTop: 24 },
+    wrapper: { marginBottom: 0, scrollMarginTop: 24 },
     header: { display: "flex", alignItems: "flex-start", gap: 14, marginBottom: 20 },
     headerLine: {
         width: 3, minWidth: 3, height: 44, borderRadius: 4,

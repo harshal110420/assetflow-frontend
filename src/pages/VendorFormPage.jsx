@@ -157,14 +157,7 @@ export default function VendorFormPage() {
                         />
                     </div>
                 </FormField>
-            </FormSection>
 
-            {/* ── Section 2: Contact ─────────────────────────────────────── */}
-            <FormSection
-                id="contact"
-                title="Contact Details"
-                subtitle="Person and communication details for this vendor"
-            >
                 <FormField label="Contact Person" hint="Primary point of contact at this vendor">
                     <div style={{ position: "relative" }}>
                         <User
@@ -186,58 +179,49 @@ export default function VendorFormPage() {
                     </div>
                 </FormField>
 
-                <FormRow cols={2}>
-                    <FormField label="Phone" error={errors.phone}>
-                        <div style={{ position: "relative" }}>
-                            <Phone
-                                size={15}
-                                style={{
-                                    position: "absolute", left: 12, top: "50%",
-                                    transform: "translateY(-50%)",
-                                    color: "var(--text-muted)", pointerEvents: "none",
-                                }}
-                            />
-                            <input
-                                className="form-input"
-                                name="phone"
-                                value={form.phone}
-                                onChange={handleChange}
-                                placeholder="+91 98765 43210"
-                                style={{ paddingLeft: 36, borderColor: errors.phone ? "var(--danger)" : undefined }}
-                            />
-                        </div>
-                    </FormField>
+                <FormField label="Phone" error={errors.phone}>
+                    <div style={{ position: "relative" }}>
+                        <Phone
+                            size={15}
+                            style={{
+                                position: "absolute", left: 12, top: "50%",
+                                transform: "translateY(-50%)",
+                                color: "var(--text-muted)", pointerEvents: "none",
+                            }}
+                        />
+                        <input
+                            className="form-input"
+                            name="phone"
+                            value={form.phone}
+                            onChange={handleChange}
+                            placeholder="+91 98765 43210"
+                            style={{ paddingLeft: 36, borderColor: errors.phone ? "var(--danger)" : undefined }}
+                        />
+                    </div>
+                </FormField>
 
-                    <FormField label="Email" error={errors.email}>
-                        <div style={{ position: "relative" }}>
-                            <Mail
-                                size={15}
-                                style={{
-                                    position: "absolute", left: 12, top: "50%",
-                                    transform: "translateY(-50%)",
-                                    color: "var(--text-muted)", pointerEvents: "none",
-                                }}
-                            />
-                            <input
-                                className="form-input"
-                                name="email"
-                                type="email"
-                                value={form.email}
-                                onChange={handleChange}
-                                placeholder="vendor@example.com"
-                                style={{ paddingLeft: 36, borderColor: errors.email ? "var(--danger)" : undefined }}
-                            />
-                        </div>
-                    </FormField>
-                </FormRow>
-            </FormSection>
+                <FormField label="Email" error={errors.email}>
+                    <div style={{ position: "relative" }}>
+                        <Mail
+                            size={15}
+                            style={{
+                                position: "absolute", left: 12, top: "50%",
+                                transform: "translateY(-50%)",
+                                color: "var(--text-muted)", pointerEvents: "none",
+                            }}
+                        />
+                        <input
+                            className="form-input"
+                            name="email"
+                            type="email"
+                            value={form.email}
+                            onChange={handleChange}
+                            placeholder="vendor@example.com"
+                            style={{ paddingLeft: 36, borderColor: errors.email ? "var(--danger)" : undefined }}
+                        />
+                    </div>
+                </FormField>
 
-            {/* ── Section 3: Address ────────────────────────────────────── */}
-            <FormSection
-                id="address"
-                title="Address"
-                subtitle="Physical location or registered address of the vendor"
-            >
                 <FormField label="Full Address" hint="Street, city, state, PIN code">
                     <div style={{ position: "relative" }}>
                         <MapPin
@@ -259,6 +243,9 @@ export default function VendorFormPage() {
                     </div>
                 </FormField>
             </FormSection>
+
+            {/* ── Section 2: Contact ─────────────────────────────────────── */}
+          
         </FormPageLayout>
     );
 }
