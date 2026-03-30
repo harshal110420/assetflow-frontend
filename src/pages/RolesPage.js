@@ -16,6 +16,7 @@ import {
 import api from "../services/api";
 import toast from "react-hot-toast";
 import { usePermission } from "../hooks/usePermission";
+import { useNavigate } from "react-router-dom";
 
 const ACTION_LABELS = {
   view: "View",
@@ -355,6 +356,7 @@ function RoleModal({ role, onClose }) {
 // ── Main Roles Page ────────────────────────────────────────────────────────────
 export default function RolesPage() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { roles } = useSelector((s) => s.permissions);
   const { user: me } = useSelector((s) => s.auth);
   const [showModal, setShowModal] = useState(false);
@@ -465,12 +467,9 @@ export default function RolesPage() {
         {canCreate && (
           <button
             className="btn btn-primary"
-            onClick={() => {
-              setEditRole(null);
-              setShowModal(true);
-            }}
+            onClick={() => navigate("/roles/new")}
           >
-            <Plus size={18} /> New Role
+            <Plus size={18} /> Add Role
           </button>
         )}
       </div>
@@ -637,8 +636,7 @@ export default function RolesPage() {
                           <button
                             className="btn btn-secondary btn-sm"
                             onClick={() => {
-                              setEditRole(role);
-                              setShowModal(true);
+                              navigate(`/roles/${role.id}/edit`);
                             }}
                             title="Edit permissions"
                           >

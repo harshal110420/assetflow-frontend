@@ -32,6 +32,8 @@ import VendorPage from "./pages/VendorPage";
 import BrandPage from "./pages/BrandPage";
 import VendorFormPage from "./pages/VendorFormPage";
 import UserFormPage from "./pages/UserFormPage";
+import RoleFormPage from "./pages/RoleFormPage";
+import MenuFormPage from "./pages/Menuformpage";
 
 // Route guard
 const PrivateRoute = ({ children, roles }) => {
@@ -77,8 +79,12 @@ function AppRoutes() {
         <Route path="maintenance" element={<MaintenancePage />} />
         <Route path="approvals" element={<ApprovalsPage />} />
         <Route path="roles" element={<RolesPage />} />
+        <Route path="/roles/new" element={<RoleFormPage />} />
+        <Route path="/roles/:id/edit" element={<RoleFormPage />} />
         <Route path="locations" element={<LocationsPage />} />
         <Route path="menus" element={<MenusPage />} />
+        <Route path="/menus/new" element={<MenuFormPage />} />
+        <Route path="/menus/:id/edit" element={<MenuFormPage />} />
         <Route path="employees" element={<EmployeesPage />} />
         <Route path="employees/:id" element={<EmployeeDetailPage />} />
         <Route path="divisions" element={<DivisionsPage />} />
