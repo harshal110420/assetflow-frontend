@@ -30,6 +30,8 @@ import AmcPage from "./pages/AmcPage";
 import AmcDetailPage from "./pages/AmcDetailPage";
 import VendorPage from "./pages/VendorPage";
 import BrandPage from "./pages/BrandPage";
+import VendorFormPage from "./pages/VendorFormPage";
+import UserFormPage from "./pages/UserFormPage";
 
 // Route guard
 const PrivateRoute = ({ children, roles }) => {
@@ -87,6 +89,8 @@ function AppRoutes() {
         <Route path="amc" element={<AmcPage />} />
         <Route path="amc/:id" element={<AmcDetailPage />} />
         <Route path="vendors" element={<VendorPage />} />
+        <Route path="/vendors/new" element={<VendorFormPage />} />
+        <Route path="/vendors/:id/edit" element={<VendorFormPage />} />
         <Route path="brands" element={<BrandPage />} />
         <Route
           path="approval-templates"
@@ -104,6 +108,9 @@ function AppRoutes() {
             </PrivateRoute>
           }
         />
+        <Route path="/users/new" element={<UserFormPage />} />
+        <Route path="/users/:id/edit" element={<UserFormPage />} />
+
         <Route path="reports" element={<ReportsPage />} />
         <Route path="settings" element={<SettingsPage />} />
       </Route>
