@@ -189,10 +189,7 @@ export default function AssetsPage() {
           {canCreate && (
             <button
               className="btn btn-primary"
-              onClick={() => {
-                setEditAsset(null);
-                setShowModal(true);
-              }}
+              onClick={() => navigate("/assets/new")}
             >
               <Plus size={18} /> New Asset
             </button>
@@ -425,10 +422,7 @@ export default function AssetsPage() {
                       {canCreate && (
                         <button
                           className="btn btn-primary btn-sm"
-                          onClick={() => {
-                            setEditAsset(null);
-                            setShowModal(true);
-                          }}
+                          onClick={() => navigate("/assets/new")}
                         >
                           Add first asset
                         </button>
@@ -585,7 +579,9 @@ export default function AssetsPage() {
                             {canEdit && (
                               <button
                                 className="btn btn-secondary btn-sm"
-                                onClick={(e) => handleEdit(asset, e)}
+                                onClick={() =>
+                                  navigate(`/assets/${asset.id}/edit`)
+                                }
                                 title="Edit"
                               >
                                 <Edit size={14} />

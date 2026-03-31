@@ -252,7 +252,7 @@ export default function UsersPage() {
                       transition: "background 0.15s",
                       cursor: canEdit ? "pointer" : "default",
                     }}
-                    onClick={() => canEdit && navigate(`/users/${u.id}/edit`)}
+                    // onClick={() => canEdit && navigate(`/users/${u.id}/edit`)}
                     onMouseEnter={(e) =>
                       (e.currentTarget.style.background =
                         "var(--surface-2, rgba(255,255,255,0.03))")

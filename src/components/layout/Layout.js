@@ -20,6 +20,8 @@ const FORM_ROUTES = [
   "/roles/",
   "/menus/new",
   "/menus/",
+  "/assets/new",
+  "/assets/",
   // aur pages add karte jao yahan
 ];
 
@@ -62,7 +64,6 @@ export default function Layout() {
           flexDirection: "column",
           minHeight: "100vh",
           minWidth: 0,
-          overflow: "hidden",
         }}
       >
         <Header />
