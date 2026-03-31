@@ -35,6 +35,8 @@ import UserFormPage from "./pages/UserFormPage";
 import RoleFormPage from "./pages/RoleFormPage";
 import MenuFormPage from "./pages/Menuformpage";
 import AssetFormPage from "./pages/AssetFormPage";
+import MaintenanceFormPage from "./pages/MaintenanceFormPage";
+import AmcFormPage from "./pages/AmcFormPage";
 
 // Route guard
 const PrivateRoute = ({ children, roles }) => {
@@ -80,6 +82,8 @@ function AppRoutes() {
         <Route path="/assets/:id/edit" element={<AssetFormPage />} />
         <Route path="assets/:id" element={<AssetDetailPage />} />
         <Route path="maintenance" element={<MaintenancePage />} />
+        <Route path="/maintenance/new" element={<MaintenanceFormPage />} />
+        <Route path="/maintenance/:id/edit" element={<MaintenanceFormPage />} />
         <Route path="approvals" element={<ApprovalsPage />} />
         <Route path="roles" element={<RolesPage />} />
         <Route path="/roles/new" element={<RoleFormPage />} />
@@ -97,6 +101,8 @@ function AppRoutes() {
         <Route path="bulk-import" element={<BulkImport />} />
         <Route path="amc" element={<AmcPage />} />
         <Route path="amc/:id" element={<AmcDetailPage />} />
+        <Route path="amc/new" element={<AmcFormPage />} />
+        <Route path="amc/:id/edit" element={<AmcFormPage />} />
         <Route path="vendors" element={<VendorPage />} />
         <Route path="/vendors/new" element={<VendorFormPage />} />
         <Route path="/vendors/:id/edit" element={<VendorFormPage />} />

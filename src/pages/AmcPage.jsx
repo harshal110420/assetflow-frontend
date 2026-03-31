@@ -118,7 +118,8 @@ export default function AmcPage() {
                 <div style={{ display: "flex", gap: 10 }}>
                     <button className="btn btn-secondary btn-sm" onClick={load}><RefreshCw size={15} /></button>
                     {canCreate && (
-                        <button className="btn btn-primary" onClick={() => { setEditContract(null); setShowModal(true); }}>
+                        <button className="btn btn-primary" onClick={() => navigate("/amc/new")}
+                        >
                             <Plus size={16} /> New Contract
                         </button>
                     )}
@@ -239,7 +240,9 @@ export default function AmcPage() {
                                             <div style={{ display: "flex", gap: 6 }}>
                                                 <button className="btn btn-secondary btn-sm" onClick={() => navigate(`/amc/${c.id}`)} title="View"><Eye size={14} /></button>
                                                 {canEdit && (
-                                                    <button className="btn btn-secondary btn-sm" onClick={(e) => { e.stopPropagation(); setEditContract(c); setShowModal(true); }}>
+                                                    <button className="btn btn-secondary btn-sm" onClick={() => navigate(`/amc/${c.id}/edit`)}
+                                                        title="Edit"
+                                                    >
                                                         <Edit2 size={13} />
                                                     </button>
                                                 )}

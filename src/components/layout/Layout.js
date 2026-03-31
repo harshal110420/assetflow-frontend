@@ -22,6 +22,10 @@ const FORM_ROUTES = [
   "/menus/",
   "/assets/new",
   "/assets/",
+  "/maintenance/new",
+  "/maintenance/",
+  "/amc/new",
+  "/amc/",
   // aur pages add karte jao yahan
 ];
 

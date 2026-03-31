@@ -19,6 +19,7 @@ import {
 import toast from "react-hot-toast";
 import api from "../services/api";
 import { usePermission } from "../hooks/usePermission";
+import { useNavigate } from "react-router-dom";
 
 const PRIORITIES = ["Low", "Medium", "High", "Critical"];
 const TYPES = [
@@ -50,243 +51,6 @@ const priorityColor = {
   Critical: "var(--danger)",
 };
 
-function MaintenanceModal({ maintenance, onClose }) {
-  const dispatch = useDispatch();
-  const { employees } = useSelector((s) => s.employees); // ✅ redux se employees
-  const [assets, setAssets] = useState([]);
-  const [form, setForm] = useState({
-    assetId: maintenance?.assetId || "",
-    type: maintenance?.type || "Preventive",
-    title: maintenance?.title || "",
-    description: maintenance?.description || "",
-    status: maintenance?.status || "Scheduled",
-    priority: maintenance?.priority || "Medium",
-    scheduledDate: maintenance?.scheduledDate || "",
-    cost: maintenance?.cost || "",
-    technicianId: maintenance?.technicianId || "", // ye Employee ka ID hai
-    vendor: maintenance?.vendor || "",
-    notes: maintenance?.notes || "",
-  });
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    api
-      .get("/assets", { params: { limit: 100 } })
-      .then((r) => setAssets(r.data.data || []));
-    // ✅ Employees redux se already load ho jayenge (parent mein dispatch kiya hai)
-    // Agar nahi hain to yahan bhi fetch karo
-    dispatch(fetchEmployees({ limit: 200, isActive: true }));
-  }, []);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const action = maintenance
-        ? updateMaintenance({ id: maintenance.id, ...form })
-        : createMaintenance(form);
-      const result = await dispatch(action);
-      if (result.error) throw new Error(result.payload);
-      toast.success(maintenance ? "Updated!" : "Maintenance scheduled!");
-      onClose();
-    } catch (err) {
-      toast.error(err.message || "Failed");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const set = (f) => (e) => setForm({ ...form, [f]: e.target.value });
-
-  return (
-    <div
-      className="modal-overlay"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div className="modal">
-        <div className="modal-header">
-          <h2 className="modal-title">
-            {maintenance ? "Edit Maintenance" : "Schedule Maintenance"}
-          </h2>
-          <button
-            onClick={onClose}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              color: "var(--text-muted)",
-            }}
-          >
-            <X size={20} />
-          </button>
-        </div>
-        <form
-          onSubmit={handleSubmit}
-          style={{ display: "flex", flexDirection: "column", gap: 14 }}
-        >
-          <div className="form-group">
-            <label className="form-label">Asset *</label>
-            <select
-              className="form-select"
-              value={form.assetId}
-              onChange={set("assetId")}
-              required
-            >
-              <option value="">Select asset...</option>
-              {assets.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.name} ({a.assetTag})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="grid-2">
-            <div className="form-group">
-              <label className="form-label">Type</label>
-              <select
-                className="form-select"
-                value={form.type}
-                onChange={set("type")}
-              >
-                {TYPES.map((t) => (
-                  <option key={t}>{t}</option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group">
-              <label className="form-label">Priority</label>
-              <select
-                className="form-select"
-                value={form.priority}
-                onChange={set("priority")}
-              >
-                {PRIORITIES.map((p) => (
-                  <option key={p}>{p}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Title *</label>
-            <input
-              className="form-input"
-              value={form.title}
-              onChange={set("title")}
-              placeholder="Annual maintenance check"
-              required
-            />
-          </div>
-
-          <div className="grid-2">
-            <div className="form-group">
-              <label className="form-label">Scheduled Date</label>
-              <input
-                className="form-input"
-                type="date"
-                value={form.scheduledDate}
-                onChange={set("scheduledDate")}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Status</label>
-              <select
-                className="form-select"
-                value={form.status}
-                onChange={set("status")}
-              >
-                {STATUSES.map((s) => (
-                  <option key={s}>{s}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="grid-2">
-            <div className="form-group">
-              <label className="form-label">Estimated Cost (₹)</label>
-              <input
-                className="form-input"
-                type="number"
-                value={form.cost}
-                onChange={set("cost")}
-                placeholder="0.00"
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Vendor</label>
-              <input
-                className="form-input"
-                value={form.vendor}
-                onChange={set("vendor")}
-                placeholder="Service provider"
-              />
-            </div>
-          </div>
-
-          {/* ✅ Technician — Employee dropdown */}
-          <div className="form-group">
-            <label className="form-label">Technician (Employee)</label>
-            <select
-              className="form-select"
-              value={form.technicianId}
-              onChange={set("technicianId")}
-            >
-              <option value="">-- Select Technician (optional) --</option>
-              {employees
-                .filter((e) => e.isActive)
-                .map((emp) => (
-                  <option key={emp.id} value={emp.id}>
-                    {emp.firstName} {emp.lastName}
-                    {emp.employeeCode ? ` (${emp.employeeCode})` : ""}
-                    {emp.designation ? ` — ${emp.designation}` : ""}
-                  </option>
-                ))}
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Notes</label>
-            <textarea
-              className="form-input"
-              value={form.notes}
-              onChange={set("notes")}
-              rows={3}
-              style={{ resize: "vertical" }}
-            />
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              gap: 10,
-              justifyContent: "flex-end",
-              paddingTop: 12,
-              borderTop: "1px solid var(--border)",
-            }}
-          >
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={onClose}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={loading}
-            >
-              {loading ? "Saving..." : maintenance ? "Update" : "Schedule"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
-
 export default function MaintenancePage() {
   const dispatch = useDispatch();
   const { maintenances, isLoading } = useSelector((s) => s.maintenance);
@@ -294,7 +58,7 @@ export default function MaintenancePage() {
   const [editItem, setEditItem] = useState(null);
   const [statusFilter, setStatusFilter] = useState("");
   const { can } = usePermission();
-
+  const navigate = useNavigate();
   useEffect(() => {
     dispatch(fetchMaintenances({ status: statusFilter }));
     dispatch(fetchEmployees({ limit: 200, isActive: true })); // ✅ employees preload
@@ -338,10 +102,7 @@ export default function MaintenancePage() {
         {canCreate && (
           <button
             className="btn btn-primary"
-            onClick={() => {
-              setEditItem(null);
-              setShowModal(true);
-            }}
+            onClick={() => navigate("/maintenance/new")}
           >
             <Plus size={18} /> Schedule Maintenance
           </button>
@@ -528,10 +289,9 @@ export default function MaintenancePage() {
                           {canEdit && (
                             <button
                               className="btn btn-secondary btn-sm"
-                              onClick={() => {
-                                setEditItem(m);
-                                setShowModal(true);
-                              }}
+                              onClick={() =>
+                                navigate(`/maintenance/${m.id}/edit`)
+                              }
                             >
                               Edit
                             </button>
@@ -554,17 +314,6 @@ export default function MaintenancePage() {
           </table>
         )}
       </div>
-
-      {showModal && (
-        <MaintenanceModal
-          maintenance={editItem}
-          onClose={() => {
-            setShowModal(false);
-            setEditItem(null);
-            dispatch(fetchMaintenances());
-          }}
-        />
-      )}
     </div>
   );
 }
