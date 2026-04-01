@@ -26,6 +26,8 @@ const FORM_ROUTES = [
   "/maintenance/",
   "/amc/new",
   "/amc/",
+  "/employees/new",
+  "/employees/",
   // aur pages add karte jao yahan
 ];
 

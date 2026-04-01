@@ -322,7 +322,7 @@ export default function EmployeesPage() {
                 <div style={{ display: "flex", gap: 10 }}>
                     <button className="btn btn-secondary btn-sm" onClick={load}><RefreshCw size={15} /></button>
                     {canCreate && (
-                        <button className="btn btn-primary" onClick={() => { setEditEmployee(null); setShowModal(true); }}>
+                        <button className="btn btn-primary" onClick={() => navigate("/employees/new")}>
                             <Plus size={16} /> Add Employee
                         </button>
                     )}
@@ -436,7 +436,7 @@ export default function EmployeesPage() {
                                                             <Eye size={14} />
                                                         </button>
                                                         {canEdit && (
-                                                            <button className="btn btn-secondary btn-sm" onClick={() => { setEditEmployee(emp); setShowModal(true); }} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                                                            <button className="btn btn-secondary btn-sm" onClick={() => navigate(`/employees/${emp.id}/edit`)}>
                                                                 <Edit2 size={13} /> Edit
                                                             </button>
                                                         )}

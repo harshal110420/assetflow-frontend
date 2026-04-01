@@ -37,6 +37,7 @@ import MenuFormPage from "./pages/Menuformpage";
 import AssetFormPage from "./pages/AssetFormPage";
 import MaintenanceFormPage from "./pages/MaintenanceFormPage";
 import AmcFormPage from "./pages/AmcFormPage";
+import EmployeeFormPage from "./pages/EmployeeFormPage";
 
 // Route guard
 const PrivateRoute = ({ children, roles }) => {
@@ -94,6 +95,8 @@ function AppRoutes() {
         <Route path="/menus/:id/edit" element={<MenuFormPage />} />
         <Route path="employees" element={<EmployeesPage />} />
         <Route path="employees/:id" element={<EmployeeDetailPage />} />
+        <Route path="/employees/new" element={<EmployeeFormPage />} />
+        <Route path="/employees/:id/edit" element={<EmployeeFormPage />} />
         <Route path="divisions" element={<DivisionsPage />} />
         <Route path="departments" element={<DepartmentsPage />} />
         <Route path="category" element={<CategoryPage />} />
