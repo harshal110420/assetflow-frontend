@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 export default function LoginPage() {
   const dispatch = useDispatch();
   const { isLoading, error } = useSelector((s) => s.auth);
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({ email: "visitor@assetflow.com", password: "visitor" });
   const [showPass, setShowPass] = useState(false);
   const navigate = useNavigate();
   useEffect(() => {

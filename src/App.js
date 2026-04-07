@@ -113,19 +113,12 @@ function AppRoutes() {
         <Route
           path="approval-templates"
           element={
-            <AdminRoute>
-              <ApprovalTemplatesPage />
-            </AdminRoute>
+            // <AdminRoute>
+            <ApprovalTemplatesPage />
+            // </AdminRoute>
           }
         />
-        <Route
-          path="users"
-          element={
-            <PrivateRoute roles={["admin", "manager"]}>
-              <UsersPage />
-            </PrivateRoute>
-          }
-        />
+        <Route path="users" element={<UsersPage />} />
         <Route path="/users/new" element={<UserFormPage />} />
         <Route path="/users/:id/edit" element={<UserFormPage />} />
 

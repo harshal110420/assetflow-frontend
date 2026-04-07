@@ -407,23 +407,25 @@ export default function UsersPage() {
                             <Edit2 size={13} /> Edit
                           </button>
                         )}
-                        <button
-                          className="btn btn-secondary btn-sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setPermissionUser(u);
-                          }}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 6,
-                            color: "var(--accent)",
-                            borderColor: "rgba(0,212,255,0.3)",
-                          }}
-                          title="Manage Permissions"
-                        >
-                          <Key size={13} /> Permissions
-                        </button>
+                        {canEdit && (
+                          <button
+                            className="btn btn-secondary btn-sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPermissionUser(u);
+                            }}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 6,
+                              color: "var(--accent)",
+                              borderColor: "rgba(0,212,255,0.3)",
+                            }}
+                            title="Manage Permissions"
+                          >
+                            <Key size={13} /> Permissions
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
