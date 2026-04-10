@@ -27,7 +27,7 @@ const ALL_ACTIONS = [
 
 const ICON_OPTIONS = [
     "LayoutDashboard", "Package", "Wrench", "CheckSquare", "BarChart2", "Users",
-    "Shield", "MapPin", "Settings", "FileText", "Database", "Bell", "Calendar",
+    "Shield", "MapPin", "Settings", "FileText", "Database", "DatabaseZapIcon", "DatabaseIcon", "Bell", "Calendar",
     "Truck", "Monitor", "Smartphone", "Laptop", "Server", "Cpu", "HardDrive",
     "Clipboard", "ClipboardList", "FolderOpen", "Archive", "Tag", "Layers",
     "PieChart", "TrendingUp", "DollarSign", "ShoppingCart", "Tool", "AlertCircle",

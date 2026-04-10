@@ -3,6 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
     User, Mail, Lock, Phone, Shield, Building2, Users, MapPin,
+    EyeOff,
+    Eye,
 } from "lucide-react";
 import { createUser, updateUser } from "../store/slices/userSlice";
 import { fetchRoles } from "../store/slices/permissionSlice";
@@ -50,7 +52,7 @@ export default function UserFormPage() {
     const [saving, setSaving] = useState(false);
     const [loading, setLoading] = useState(isEdit);
     const [isDirty, setIsDirty] = useState(false);
-
+    const [showPass, setShowPass] = useState(false);
     // Locations state
     const [locations, setLocations] = useState([]);
     const [assignedLocationIds, setAssignedLocationIds] = useState([]);
@@ -293,12 +295,33 @@ export default function UserFormPage() {
                             <input
                                 className={`form-input ${errors.password ? "input-error" : ""}`}
                                 name="password"
-                                type="password"
+                                type={showPass ? "text" : "password"}
                                 value={form.password}
                                 onChange={handleChange}
                                 placeholder={isEdit ? "Leave blank to keep unchanged" : "Min 6 characters"}
-                                style={withIcon(null, { borderColor: errors.password ? "var(--danger)" : undefined })}
+                                style={withIcon(null, {
+                                    paddingRight: form.password ? 44 : undefined,
+                                    borderColor: errors.password ? "var(--danger)" : undefined
+                                })}
                             />
+                            {form.password && (
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPass(!showPass)}
+                                    style={{
+                                        position: "absolute",
+                                        right: 12,
+                                        top: "50%",
+                                        transform: "translateY(-50%)",
+                                        background: "none",
+                                        border: "none",
+                                        cursor: "pointer",
+                                        color: "var(--text-muted)",
+                                    }}
+                                >
+                                    {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
+                            )}
                         </div>
                     </FormField>
 
