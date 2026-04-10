@@ -8,7 +8,12 @@ import { useNavigate } from "react-router-dom";
 export default function LoginPage() {
   const dispatch = useDispatch();
   const { isLoading, error } = useSelector((s) => s.auth);
-  const [form, setForm] = useState({ email: "visitor@assetflow.com", password: "visitor" });
+  // BAAD MEIN:
+  const showVisitor = process.env.REACT_APP_SHOW_VISITOR === "true";
+  const [form, setForm] = useState({
+    email: showVisitor ? "visitor@assetflow.com" : "",
+    password: showVisitor ? "visitor" : "",
+  });
   const [showPass, setShowPass] = useState(false);
   const navigate = useNavigate();
   useEffect(() => {
