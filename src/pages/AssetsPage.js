@@ -24,6 +24,7 @@ import AssetModal from "../components/assets/AssetModal";
 import { usePermission } from "../hooks/usePermission";
 import api from "../services/api";
 import { highlight } from "../utils/highlight";
+import { isHandoverMailEnabled } from "../utils/assetHelpers";
 
 const STATUSES = [
   "Active",
@@ -39,19 +40,6 @@ const CONDITIONS = ["Excellent", "Good", "Fair", "Poor", "Damaged"];
 // Approval "approved" matlab asset.assignmentType === "employee"
 // AND latest ApprovalRequest for this asset ka status === "approved"
 // Hum asset object mein latestApproval include karte hain (backend se)
-function isHandoverMailEnabled(asset) {
-  if (asset.assignmentType !== "employee") return false;
-  if (!asset.assignedToId) return false;
-
-  // ✅ approvalRequests array aayega (separate: true ke saath)
-  const approvals = asset.approvalRequests;
-
-  // Koi approval request nahi — autoApproved tha
-  if (!approvals || approvals.length === 0) return true;
-
-  // Latest request ka status check karo
-  return approvals[0].status === "approved";
-}
 
 export default function AssetsPage() {
   const dispatch = useDispatch();

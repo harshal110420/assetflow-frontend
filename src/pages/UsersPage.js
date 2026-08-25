@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { fetchUsers } from "../store/slices/userSlice";
@@ -23,8 +23,8 @@ export default function UsersPage() {
   const { departments } = useSelector((s) => s.departments);
 
   const { can } = usePermission();
-  const canCreate = can("users", "new");
-  const canEdit = can("users", "edit");
+  const canCreate = useMemo(() => can("users", "new"), [can]);
+  const canEdit = useMemo(() => can("users", "edit"), [can]);
 
   const [permissionUser, setPermissionUser] = useState(null);
   const [search, setSearch] = useState("");
@@ -39,46 +39,67 @@ export default function UsersPage() {
   }, [dispatch]);
 
   // ── Helpers ───────────────────────────────────────────────────────────────
-  const getManagerName = (managerId) => {
-    const manager = users.find((u) => u.id === managerId);
-    return manager ? `${manager.firstName} ${manager.lastName}` : "—";
-  };
+  const getManagerName = useCallback(
+    (managerId) => {
+      const manager = users.find((u) => u.id === managerId);
+      return manager ? `${manager.firstName} ${manager.lastName}` : "—";
+    },
+    [users],
+  );
 
-  const getDepartmentName = (deptId) => {
-    const dept = departments.find((d) => d.id === deptId);
-    return dept ? dept.name : "—";
-  };
+  const getDepartmentName = useCallback(
+    (deptId) => {
+      const dept = departments.find((d) => d.id === deptId);
+      return dept ? dept.name : "—";
+    },
+    [departments],
+  );
 
   // ── Filter ────────────────────────────────────────────────────────────────
-  const uniqueRoles = [...new Set(users.map((u) => u.role).filter(Boolean))];
+  const uniqueRoles = useMemo(
+    () => [...new Set(users.map((u) => u.role).filter(Boolean))],
+    [users],
+  );
 
-  const uniqueDepartments = [
-    ...new Set(
-      users
-        .map((u) => departments.find((d) => d.id === u.departmentId)?.name)
-        .filter(Boolean),
-    ),
-  ];
+  const uniqueDepartments = useMemo(
+    () => [
+      ...new Set(
+        users
+          .map((u) => departments.find((d) => d.id === u.departmentId)?.name)
+          .filter(Boolean),
+      ),
+    ],
+    [users, departments],
+  );
 
-  const filtered = users.filter((u) => {
-    const q = search.toLowerCase();
-    const matchSearch =
-      `${u.firstName} ${u.lastName}`.toLowerCase().includes(q) ||
-      u.email?.toLowerCase().includes(q) ||
-      u.phone?.toLowerCase().includes(q) ||
-      u.department?.name?.toLowerCase().includes(q);
+  const filtered = useMemo(() => {
+    return users.filter((u) => {
+      const q = search.toLowerCase();
+      const matchSearch =
+        `${u.firstName} ${u.lastName}`.toLowerCase().includes(q) ||
+        u.email?.toLowerCase().includes(q) ||
+        u.phone?.toLowerCase().includes(q) ||
+        u.department?.name?.toLowerCase().includes(q);
 
-    const matchRole = filterRole === "all" || u.role === filterRole;
-    const matchStatus =
-      filterStatus === "all" ||
-      (filterStatus === "active" && u.isActive !== false) ||
-      (filterStatus === "inactive" && u.isActive === false);
-    const matchDept =
-      filterDepartment === "all" ||
-      getDepartmentName(u.departmentId) === filterDepartment;
+      const matchRole = filterRole === "all" || u.role === filterRole;
+      const matchStatus =
+        filterStatus === "all" ||
+        (filterStatus === "active" && u.isActive !== false) ||
+        (filterStatus === "inactive" && u.isActive === false);
+      const matchDept =
+        filterDepartment === "all" ||
+        getDepartmentName(u.departmentId) === filterDepartment;
 
-    return matchSearch && matchRole && matchStatus && matchDept;
-  });
+      return matchSearch && matchRole && matchStatus && matchDept;
+    });
+  }, [
+    users,
+    search,
+    filterRole,
+    filterStatus,
+    filterDepartment,
+    getDepartmentName,
+  ]);
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
@@ -244,6 +265,7 @@ export default function UsersPage() {
                 {filtered.map((u, i) => (
                   <tr
                     key={u.id}
+                    className="user-row"
                     style={{
                       borderBottom:
                         i < filtered.length - 1
@@ -253,13 +275,13 @@ export default function UsersPage() {
                       cursor: canEdit ? "pointer" : "default",
                     }}
                     // onClick={() => canEdit && navigate(`/users/${u.id}/edit`)}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.background =
-                        "var(--surface-2, rgba(255,255,255,0.03))")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.background = "transparent")
-                    }
+                    // onMouseEnter={(e) =>
+                    //   (e.currentTarget.style.background =
+                    //     "var(--surface-2, rgba(255,255,255,0.03))")
+                    // }
+                    // onMouseLeave={(e) =>
+                    //   (e.currentTarget.style.background = "transparent")
+                    // }
                   >
                     {/* User */}
                     <td style={{ padding: "12px 16px" }}>
